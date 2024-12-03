@@ -97,7 +97,7 @@ def iniciar_conexao(host, port=21, usuario=None, senha=None):
         # Estabelece conexão
         ftp = FTP(timeout=5, encoding="utf-8")
         ftp.connect(host=host, port=port)
-        log.info("Conexão estabelecida com %s na porta %s.", host, port)
+        log.info("\n\nConexão estabelecida com %s na porta %s.", host, port)
 
         # Realiza login como usuário ou anônimo
         if usuario or senha:
@@ -157,12 +157,54 @@ def _baixar_arquivo_com_extensao_especifica(
         _baixar_arquivo(ftp, diretorio_completo)
 
 
+def _profundidade_maxima():
+    # Interação com usuário para coleta do nível de profundidade de navegação nos diretórios do servidor FTP
+    try:
+        print(
+            """\n\nA seguir preencha o nível de profundidade de navegação (o padrão é nível 3). 
+            \nATENÇÃO: quanto maior o número maiores a possibilidade de sobrecarga de sua conexão, e uso de armazenamento."""
+        )
+
+        entrada = input("Por favor, preencha o nível de profundida de navegação: ")
+
+        if not entrada:  # Se não houver nenhuma informação retorna o padrão
+            return 3
+
+        profundidade_maxima = int(entrada)
+
+        if profundidade_maxima > 15:
+            resposta_confirmacao = input(
+                "Você tem certeza deste nível? Maior que 15? Digite '1' para Sim, '2' para Não."
+            )
+
+            confirmacao_profundidade = int(resposta_confirmacao)
+            if confirmacao_profundidade == 1:
+                return profundidade_maxima
+            elif confirmacao_profundidade == 2:
+                print("Por favor, insira novamente um nível de profundidade.")
+                return _profundidade_maxima()
+            else:
+                print("Entrada inválida. Profundidade definida como 3 (padrão).")
+
+            return profundidade_maxima
+    except ValueError:
+        print("Entrada inválida, Por favor responda com um número válido.")
+        return profundidade_maxima()
+    except Exception as e:
+        log.error(
+            f"Erro durante a requisição de nível de profundidade da navegação: {e}"
+        )
+        raise
+
+
 def raspagem_sevidor(
     ftp,
-    profundidade_maxima=10,
     condicao_baixar=False,
     tipo_extensao=None,
 ):
+    profundidade_maxima = (
+        _profundidade_maxima()
+    )  # interação com o usuário para definir nível de profundidade de navegação
     try:
         # Realiza a navegação e download dos dados baseando-se nos dirétorios encontrados
 

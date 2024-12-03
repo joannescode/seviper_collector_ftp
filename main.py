@@ -26,7 +26,6 @@ def main():
         # coleta das informações (diretórios e dados)
         raspagem_sevidor(
             ftp=ftp,
-            profundidade_maxima=50,
             condicao_baixar=condicao_baixar,
             tipo_extensao=tipo_extensao,
         )
