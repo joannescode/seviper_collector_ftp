@@ -1,6 +1,6 @@
 # SeviperCollectorFTP
 
-Seviper é uma ferramenta escrita em Python para navegação e coleta de dados e servidores FTP.
+Seviper é uma ferramenta escrita em Python para navegação e coleta de dados em servidores FTP.
 
 ## 💻 Guia de uso
 
@@ -37,4 +37,8 @@ Siga o passo a passo abaixo para executar o main.py corretamente:
 - Python3
 - FTPLib
 - Logging
-- OS
+- Os
+  
+<hr>
+
+*Desenvolvido inicialmente por joannescode 💻*
