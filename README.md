@@ -28,7 +28,7 @@ Ou se preferir, baixar o repositório como .zip.
 Siga o passo a passo abaixo para executar o main.py corretamente:
 
 - Executar o main.py via terminal ou dentro do ambiente de desenvolvimento
-- Responder os parâmetros necessários, sendo forma de download, informações para conexão e autenticação e profundidade de navegação.
+- Responder os parâmetros necessários, sendo forma de download, profundidade de navegação, informações para conexão e autenticação e .
 
 *Demonstração da ferramenta:*
 ![Desmonstração da Ferramenta](<images/demonstracao.gif>)
@@ -41,4 +41,4 @@ Siga o passo a passo abaixo para executar o main.py corretamente:
   
 <hr>
 
-*Desenvolvido inicialmente por joannescode 💻*
+*Desenvolvido inicialmente por [joannescode](https://github.com/joannescode) 💻*
