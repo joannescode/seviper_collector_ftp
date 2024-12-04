@@ -24,7 +24,7 @@ Ou se preferir, baixar o repositório como .zip.
 
 ![Forma de adquirir a ferramenta](images/download_ferramenta.png)
 
-### Executando a ferramenta
+### 🤖 Executando a ferramenta
 Siga o passo a passo abaixo para executar o main.py corretamente:
 
 - Executar o main.py via terminal ou dentro do ambiente de desenvolvimento
