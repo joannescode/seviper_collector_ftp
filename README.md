@@ -1,4 +1,4 @@
-# SeviperCollectorFTP
+# Seviper Collector
 
 Seviper é uma ferramenta escrita em Python para navegação e coleta de dados em servidores FTP.
 
