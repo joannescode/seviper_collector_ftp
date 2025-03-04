@@ -1,39 +1,40 @@
 # Seviper Collector
 
-Seviper é uma ferramenta escrita em Python para navegação e coleta de dados em servidores FTP.
+A tool write in Python for navigation and collect data from FPT servers.
 
-## 💻 Guia de uso
+## 💻 Started Guide
 
-As instruções abaixo permitirão que você obtenha uma cópia do projeto para uso, desenvolvimento e ou testes.
+The guide down below allow what you obtain a copy from project for use, development or testings.
 
-### 📋 Pré-requisitos
+### 📋 Requirements
 - Python3 
-- Ambiente de Desenvolvimento 
-- Conexão com internet
-- Endereço de host do servidor FTP
-- Número de porta do servidor FTP (não obrigatório)
-- Usuário de acesso do servidor FTP (não obrigatório)
-- Senha de usuário do servidor FTP (não obrigatório)
+- Development Environment
+- Conection with Internet
+- Host address for FTP Server
+- Host address for FTP Server
+- Port of number for FTP Server (not mandatory)
+- Username for conection of FTP Server (not mandatory)
+- Password for conection of FTP Server (not mandatory)
 
-### 📥 Instalação da ferramenta
-Basta passar o comando abaixo em seu terminal dentro de uma pasta de sua escolha.
+### 📥 Download Tool
+Type command in your terminal and clone this tool.
 
 `git clone git@github.com:joannescode/SeviperCollectorFTP.git`
 
-Ou se preferir, baixar o repositório como .zip.
+Or get tool in zip through download direct.
 
-![Forma de adquirir a ferramenta](images/download_ferramenta.png)
+![Get tool](images/download_ferramenta.png)
 
-### 🤖 Executando a ferramenta
-Siga o passo a passo abaixo para executar o main.py corretamente:
+### 🤖 Running tool
+Follow step by step down below for running main.py:
+- Running main.py in your terminal or development environment
+- Respond parameters necessary, download kind, deeping navigation, conection and authentication. 
 
-- Executar o main.py via terminal ou dentro do ambiente de desenvolvimento
-- Responder os parâmetros necessários, sendo forma de download, profundidade de navegação, informações para conexão e autenticação.
 
-*Demonstração da ferramenta:*
-![Desmonstração da Ferramenta](<images/demonstracao.gif>)
+*Demonstration of tool:*
+![Demonstration](<images/demonstracao.gif>)
 
-### 🛠️ Desenvolvido em/com
+### 🛠️ Building with
 - Python3
 - FTPLib
 - Logging
@@ -41,4 +42,4 @@ Siga o passo a passo abaixo para executar o main.py corretamente:
   
 <hr>
 
-*Desenvolvido inicialmente por [joannescode](https://github.com/joannescode) 💻*
+*Initially developed by [joannescode](https://github.com/joannescode) 💻*

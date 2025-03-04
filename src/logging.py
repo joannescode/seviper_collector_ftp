@@ -1,19 +1,32 @@
 import logging
 
 
-def registros(
+def get_logger(
     fname="seviper.log",
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s - %(message)s",
     datefmt="%H:%M:%S",
 ):
+    """
+    Configures and returns a logger instance.
+
+    If the logger does not already have handlers, this function sets up a file
+    handler and a console handler with the specified logging level, format, and
+    date format.
+
+    Parameters:
+    fname (str): The filename for the log file. Defaults to "seviper.log".
+    level (int): The logging level (e.g., logging.INFO, logging.DEBUG). Defaults to logging.INFO.
+    format (str): The format string for log messages. Defaults to "[%(asctime)s] %(levelname)s - %(message)s".
+    datefmt (str): The date format string for log messages. Defaults to "%H:%M:%S".
+
+    Returns:
+    logging.Logger: The configured logger instance.
+    """
     logger = logging.getLogger()
 
     if not logger.hasHandlers():
-        # Por padrão já está definido a configuração básica do log
         logging.basicConfig(filename=fname, level=level, format=format, datefmt=datefmt)
-
-        # Definindo o formato do log e nível a ser retornado no .log e terminal
         console = logging.StreamHandler()
         console.setLevel(level=level)
         console.setFormatter(logging.Formatter(fmt=format, datefmt=datefmt))

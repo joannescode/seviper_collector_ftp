@@ -1,288 +1,386 @@
 from ftplib import FTP
-from src.logging import registros
+from src.logging import get_logger
 import os
 
-diretorio_atual = os.path.dirname(os.path.realpath(__file__))
-log = registros()
+current_path = os.path.dirname(os.path.realpath(__file__))
+log = get_logger()
 
 
-def baixar_extensao_especifica():
-    # Pergunta ao usuário a forma de download, sendo alguma extensão especifica ou não
+def download_extension_kind():
+    """
+    Prompts the user to specify if they wish to download a specific extension kind.
+
+    The function asks the user to input either '0' (for no) or '1' (for yes).
+    If the user inputs '1', it indicates that they wish to download a specific extension kind.
+    If the user inputs any other value, it indicates that no specific extension is selected.
+
+    Returns:
+        str: The user's input, either '0' or '1'.
+
+    Raises:
+        Exception: If there is an error during the input process.
+    """
     try:
-        condicao_baixar = input(
-            "Gostaria de baixar com alguma extensão específica? Digite 0 (para não) ou 1 (para sim):"
+        download_kind = input(
+            "Which extension kind for download you wish? Type 0 (for no) or 1 (for yes):"
         )
 
-        if condicao_baixar != "1":
-            print("Nenhuma extensão específica selecionada.\n")
-            return condicao_baixar
-        return condicao_baixar
+        if download_kind != "1":
+            log.info("No specific extension selected.\n")
+            return download_kind
+        return download_kind
     except Exception as e:
-        log.error(f"Erro na entrada da resposta da forma de download: {e}")
+        log.error(f"Error in download type input: {e}")
         raise
 
 
-def passa_extensao_especifica(condicao_baixar):
-    # Caso a condição de download seja igual a 1, requisita a entrada do tipo de extensão
+def specify_specific_extension(download_kind):
+    """Prompts the user to specify a file extension type based on the provided download kind.
+
+    Parameters:
+    download_kind (str): A string indicating the type of download. If the value is "1",
+                         the function will prompt the user to enter a desired file extension.
+
+    Returns:
+    str: The user-specified file extension if download_kind is "1".
+    None: If download_kind is not "1".
+
+    Raises:
+    Exception: If there is an error during the input process, it logs the error and raises the exception."""
     try:
-        if condicao_baixar == "1":
-            print(
-                "Por favor, informe o tipo de extensão desejada. Exemplos disponíveis:\n"
-            )
-            print(
+        if download_kind == "1":
+            log.info("Please specify the desired extension type. Available examples:\n")
+            log.info(
                 """
-            .txt  - Arquivo de texto simples.
-            .jpg  - Imagem no formato JPEG.
-            .pdf  - Documento em formato PDF (Portable Document Format).
-            .docx - Documento de texto do Microsoft Word.
-            .xlsx - Planilha do Microsoft Excel.
-            .mp3  - Arquivo de áudio no formato MP3.
-            .mp4  - Arquivo de vídeo no formato MP4.
-            .zip  - Arquivo compactado no formato ZIP.
-            .html - Arquivo de código HTML para páginas da web.
-            .exe  - Arquivo executável em sistemas Windows.
+            .txt  - Plain text file.
+            .jpg  - JPEG image file.
+            .pdf  - PDF document (Portable Document Format).
+            .docx - Microsoft Word document.
+            .xlsx - Microsoft Excel spreadsheet.
+            .mp3  - MP3 audio file.
+            .mp4  - MP4 video file.
+            .zip  - ZIP compressed file.
+            .html - HTML file for web pages.
+            .exe  - Executable file for Windows systems.
             """
             )
-            tipo_extensao = input("\nDigite a extensão desejada (ex: .txt):")
-            print(f"Você escolheu a extensão: {tipo_extensao}\n")
-            return tipo_extensao
-        elif (
-            condicao_baixar != "1"
-        ):  # Se a resposta for diferente de 1 retorna None para extensão
-            tipo_extensao = None
-            return tipo_extensao
+            extension_type = input("\nEnter the desired extension (e.g., .txt):")
+            log.info(f"You chose the extension: {extension_type}\n")
+            return extension_type
+        elif download_kind != "1":
+            extension_type = None
+            return extension_type
     except Exception as e:
-        log.error(f"Erro na entrada da resposta do tipo de extensão: {e}")
+        log.error(f"Error in extension type input: {e}")
         raise
 
 
-def requisita_credenciais():
-    # Pergunta as informações de acesso para requisição ao servidor FTP
+def request_credentials():
+    """
+    Prompts the user to input FTP connection details and credentials.
+
+    The function requests the following information from the user:
+    - Host address (mandatory)
+    - Connection port (default is 21)
+    - Access username (optional)
+    - Access password (optional)
+
+    If the host address is not provided, the function will prompt the user again.
+    If the port is not a valid number, the default port (21) will be used.
+
+    Returns:
+        tuple: A tuple containing the host address (str), port (int), username (str or None), and password (str or None).
+
+    Raises:
+        Exception: If an error occurs during the credential request process.
+    """
     try:
-        print("Preencha as informações a seguir para iniciar a conexão:")
+        log.info("Fill in the following information to initiate the connection:")
 
-        host = input("Endereço do host (exemplo: ftp.us.debian.org):").strip()
+        host = input("Host address (e.g., ftp.example.com):").strip()
         if not host:
-            print("O endereço de host é obrigatório.")
-            return requisita_credenciais()  # Retorna função
+            log.info("Host address is mandatory.")
+            return request_credentials()
 
-        port = input("Porta para conexão (o padrão é 21):").strip()
+        port = input("Connection port (default is 21):").strip()
         if not port:
-            port = 21  # Porta padrão caso esteja vazia
+            port = 21
         else:
             try:
                 port = int(port)
             except ValueError:
-                print("A porta deve ser um número. Usando o padrão (21)")
+                log.info("Port must be a number. Using default (21)")
 
-        print("\nPreencha as credenciais, caso não tenha, deixar em branco:")
+        log.info("\nFill in credentials, leave blank if not applicable:")
 
-        # Se não houver usuário e senha definidas, defini como None
-        usuario = input("Usuário de acesso:").strip()
-        if not usuario:
-            usuario = None
+        username = input("Access username:").strip()
+        if not username:
+            username = None
 
-        senha = input("Senha de acesso:").strip()
-        if not senha:
-            senha = None
+        password = input("Access password:").strip()
+        if not password:
+            password = None
 
-        return host, port, usuario, senha
+        return host, port, username, password
     except Exception as e:
-        log.error(f"Erro durante a requisição de credencias de acesso: {e}")
+        log.error(f"Error during access credentials request: {e}")
         raise
 
 
-def iniciar_conexao(host, port=21, usuario=None, senha=None):
+def initiate_connection(host, port=21, username=None, password=None):
+    """
+    Initiates an FTP connection to the specified host and port.
+
+    Parameters:
+    host (str): The hostname or IP address of the FTP server.
+    port (int, optional): The port number to connect to. Defaults to 21.
+    username (str, optional): The username for FTP login. Defaults to None for anonymous login.
+    password (str, optional): The password for FTP login. Defaults to None for anonymous login.
+
+    Returns:
+    FTP: An instance of the FTP connection.
+
+    Raises:
+    Exception: If there is an error initiating the connection.
+
+    Logs:
+    - Connection establishment details.
+    - Login details and current directory.
+    - Error details if connection initiation fails.
+    """
     try:
-        # Estabelece conexão
         ftp = FTP(timeout=5, encoding="utf-8")
         ftp.connect(host=host, port=port)
-        log.info("\n\nConexão estabelecida com %s na porta %s.", host, port)
+        log.info("\n\nConnection established with %s on port %s.", host, port)
 
-        # Realiza login como usuário ou anônimo
-        if usuario or senha:
-            ftp.login(user=usuario, passwd=senha)
-            log.info(f"Acesso como usuário: {usuario}. Diretório atual: %s", ftp.pwd())
+        if username or password:
+            ftp.login(user=username, passwd=password)
+            log.info(f"Logged in as user: {username}. Current directory: %s", ftp.pwd())
         else:
             ftp.login()
-            log.info("Acesso como anônimo. Diretório atual: %s", ftp.pwd())
+            log.info("Anonymous login. Current directory: %s", ftp.pwd())
 
         return ftp
     except Exception as e:
-        log.error("Erro ao iniciar conexão: %s", e)
-        # Garante o encerramento da conexão
-        finalizar_conexao(ftp)
+        log.error("Error initiating connection: %s", e)
+        finalize_connection(ftp)
         raise
 
 
-def _adiciona_informacao(
-    partes, tipo_letra, diretorio_completo, diretorios_navegados, fila
-):
-    # Caso as informações coletada com o parâmetro dir tenha o "tipo_letra" acrescentamos dentro da lista "fila"
-    if partes[0].startswith(tipo_letra):
-        if (
-            diretorio_completo not in diretorios_navegados
-        ):  # adiciona somente se o diretorio encontrado não esteja dentro de navegados
-            fila.append(diretorio_completo)
-            diretorios_navegados.add(diretorio_completo)
-            log.info(
-                f"Verificação realizada, informação adicionada: tipo: {tipo_letra}."
-            )
+def _add_information(parts, letter_type, full_directory, navigated_directories, queue):
+    """
+    Adds directory information to the queue and navigated directories set if the first part
+    starts with the specified letter type and the directory has not been navigated yet.
+
+    Args:
+        parts (list): A list of parts where the first element is checked against the letter_type.
+        letter_type (str): The letter type to check the first part against.
+        full_directory (str): The full directory path to be added.
+        navigated_directories (set): A set of directories that have already been navigated.
+        queue (list): A list representing the queue to which the directory will be added.
+
+    Returns:
+        bool: True if the directory was added to the queue and navigated directories, False otherwise.
+    """
+    if parts[0].startswith(letter_type):
+        if full_directory not in navigated_directories:
+            queue.append(full_directory)
+            navigated_directories.add(full_directory)
+            log.info(f"Check performed, information added: type: {letter_type}.")
             return True
     return False
 
 
-def _baixar_arquivo(ftp, diretorio_completo):
-    # Faz a transferencia do dado encontrado para a pasta local files dentro de src
-    nome_arquivo = diretorio_completo.split("/")[-1]
-    try:
-        os.makedirs(os.path.join(diretorio_atual, "files"), exist_ok=True)
+def _download_file(ftp, full_directory):
+    """
+    Downloads a file from an FTP server and saves it locally.
 
-        with open(
-            os.path.join(diretorio_atual, "files", nome_arquivo), "wb"
-        ) as arquivo_local:
-            ftp.retrbinary(f"RETR {diretorio_completo}", arquivo_local.write)
-        log.info(f"Arquivo baixado com sucesso: {nome_arquivo}")
+    Args:
+        ftp (ftplib.FTP): An instance of the FTP connection.
+        full_directory (str): The full path of the file on the FTP server.
+
+    Raises:
+        FileExistsError: If the directory already exists.
+        Exception: For any other exceptions that occur during the download process.
+
+    Logs:
+        Info: When the file is downloaded successfully.
+        Warning: If there is an error during the download process.
+    """
+    filename = full_directory.split("/")[-1]
+    try:
+        os.makedirs(os.path.join(current_path, "files"), exist_ok=True)
+
+        with open(os.path.join(current_path, "files", filename), "wb") as local_file:
+            ftp.retrbinary(f"RETR {full_directory}", local_file.write)
+        log.info(f"File downloaded successfully: {filename}")
     except FileExistsError:
         pass
     except Exception as e:
-        log.warning(f"Erro ao baixar arquivo {nome_arquivo}: {e}")
+        log.warning(f"Error downloading file {filename}: {e}")
 
 
-def _baixar_arquivo_com_extensao_especifica(
-    ftp, partes, diretorio_completo, tipo_extensao
-):
-    # Condição para a função _baixar_arquivo, no entanto com a de extensão especificada
-    if partes[-1].endswith(tipo_extensao):
-        _baixar_arquivo(ftp, diretorio_completo)
+def _download_file_with_specific_extension(ftp, parts, full_directory, extension_type):
+    """
+    Downloads a file from an FTP server if it has a specific extension.
+
+    Args:
+        ftp (ftplib.FTP): The FTP connection object.
+        parts (list): A list of parts of the file path.
+        full_directory (str): The full directory path of the file on the FTP server.
+        extension_type (str): The file extension to check for.
+
+    Returns:
+        None
+    """
+    if parts[-1].endswith(extension_type):
+        _download_file(ftp, full_directory)
 
 
-def _profundidade_maxima():
-    # Interação com usuário para coleta do nível de profundidade de navegação nos diretórios do servidor FTP
+def _max_depth():
+    """
+    Prompts the user to enter the navigation depth level for the application.
+
+    The function provides a default depth level of 3 if no input is given.
+    If the user inputs a depth level greater than 15, a confirmation is requested.
+    If the user confirms, the entered depth level is returned.
+    If the user declines or provides invalid input, the function prompts again or defaults to 3.
+
+    Returns:
+        int: The navigation depth level.
+
+    Raises:
+        Exception: If an unexpected error occurs during the input process.
+    """
     try:
-        print(
-            """\n\nA seguir preencha o nível de profundidade de navegação (o padrão é nível 3). 
-            \nATENÇÃO: quanto maior o número maiores a possibilidade de sobrecarga de sua conexão, e uso de armazenamento."""
+        log.info(
+            """\n\nPlease enter the navigation depth level (default is level 3). 
+            \nWARNING: Higher numbers increase the risk of connection overload and storage usage."""
         )
 
-        entrada = input("Por favor, preencha o nível de profundida de navegação: ")
+        input_depth = input("Please enter the depth level of navigation: ")
 
-        if not entrada:  # Se não houver nenhuma informação retorna o padrão
+        if not input_depth:
             return 3
 
-        profundidade_maxima = int(entrada)
+        max_depth = int(input_depth)
 
-        if profundidade_maxima > 15:
-            resposta_confirmacao = input(
-                "Você tem certeza deste nível? Maior que 15? Digite '1' para Sim, '2' para Não."
+        if max_depth > 15:
+            confirm_response = input(
+                "Are you sure about this level? Greater than 15? Type '1' for Yes, '2' for No."
             )
 
-            confirmacao_profundidade = int(resposta_confirmacao)
-            if confirmacao_profundidade == 1:
-                return profundidade_maxima
-            elif confirmacao_profundidade == 2:
-                print("Por favor, insira novamente um nível de profundidade.")
-                return _profundidade_maxima()
+            depth_confirmation = int(confirm_response)
+            if depth_confirmation == 1:
+                return max_depth
+            elif depth_confirmation == 2:
+                log.info("Please enter a depth level again.")
+                return _max_depth()
             else:
-                print("Entrada inválida. Profundidade definida como 3 (padrão).")
+                log.info("Invalid input. Depth set to 3 (default).")
 
-            return profundidade_maxima
+            return max_depth
     except ValueError:
-        print("Entrada inválida, Por favor responda com um número válido.")
-        return profundidade_maxima()
+        log.info("Invalid input, please respond with a valid number.")
+        return _max_depth()
     except Exception as e:
-        log.error(
-            f"Erro durante a requisição de nível de profundidade da navegação: {e}"
-        )
+        log.error(f"Error during navigation depth request: {e}")
         raise
 
 
-def raspagem_sevidor(
+def scrape_server(
     ftp,
-    condicao_baixar=False,
-    tipo_extensao=None,
+    download_kind=False,
+    extension_type=None,
 ):
-    profundidade_maxima = (
-        _profundidade_maxima()
-    )  # interação com o usuário para definir nível de profundidade de navegação
+    """
+    Scrapes the FTP server directory structure and downloads files based on the specified criteria.
+
+    Args:
+        ftp (ftplib.FTP): An active FTP connection object.
+        download_kind (bool or str, optional): Determines the type of files to download.
+            If False, all files are downloaded. If "1", only files with the specified extension are downloaded.
+        extension_type (str, optional): The file extension to filter by when download_kind is "1".
+
+    Raises:
+        Exception: If there is an error navigating or collecting server information.
+
+    Logs:
+        Various stages of processing, including directory levels, entries checked, and files or directories found.
+    """
+    max_depth = _max_depth()
     try:
-        # Realiza a navegação e download dos dados baseando-se nos dirétorios encontrados
-
-        diretorios_navegados = set()
-        profundidade_diretorio = 0
-        fila = [""]
-
-        # Laço para garantir que a fila e a profunidade não ultrapassem a profundidade máxima de diretórios
-        while fila and profundidade_diretorio != profundidade_maxima:
+        navigated_directories = set()
+        directory_depth = 0
+        queue = [""]
+        while queue and directory_depth != max_depth:
             log.info(
-                f"Processando nível {profundidade_diretorio}. Diretórios na fila: {len(fila)}"
+                f"Processing level {directory_depth}. Directories in queue: {len(queue)}"
             )
-            diretorio_atual = fila.pop(
-                0
-            )  # Realiza a adição do diretório encontrado dentro da fila
+            current_path = queue.pop(0)
             try:
+                directory_content = []
+                ftp.dir(current_path, directory_content.append)
 
-                conteudo_diretorio = []
-                ftp.dir(
-                    diretorio_atual, conteudo_diretorio.append
-                )  # Coleta as informações do diretório mapeado
-
-                for inf in conteudo_diretorio:
-                    log.info(f"Verificando entrada: {inf}")
-                    partes = inf.split()
-                    nome = partes[-1]
-                    diretorio_completo = f"{diretorio_atual}/{nome}".strip("/")
-
-                    # Faz a adição das informações desde que o tipo de dado inicie com a letra d "diretório" ou l "link de diretório"
-                    if _adiciona_informacao(
-                        partes=partes,
-                        tipo_letra="d",
-                        diretorio_completo=diretorio_completo,
-                        diretorios_navegados=diretorios_navegados,
-                        fila=fila,
+                for info in directory_content:
+                    log.info(f"Checking entry: {info}")
+                    parts = info.split()
+                    name = parts[-1]
+                    full_directory = f"{current_path}/{name}".strip("/")
+                    if _add_information(
+                        parts=parts,
+                        letter_type="d",
+                        full_directory=full_directory,
+                        navigated_directories=navigated_directories,
+                        queue=queue,
                     ):
-                        log.info(
-                            f"Diretório encontrado e adicionado: {diretorio_completo}"
-                        )
+                        log.info(f"Directory found and added: {full_directory}")
 
-                    elif _adiciona_informacao(
-                        partes=partes,
-                        tipo_letra="l",
-                        diretorio_completo=diretorio_completo,
-                        diretorios_navegados=diretorios_navegados,
-                        fila=fila,
+                    elif _add_information(
+                        parts=parts,
+                        letter_type="l",
+                        full_directory=full_directory,
+                        navigated_directories=navigated_directories,
+                        queue=queue,
                     ):
+                        log.info(f"Symbolic link found and added: {full_directory}")
 
-                        log.info(
-                            f"Link simbólico encontrado e adicionado: {diretorio_completo}"
-                        )
-
-                    # Baixa o dado encontrado baseando-se no parâmetro passado inicialmente pelo usuário (todos os dados ou somente x extensão)
-                    elif partes[0].startswith("-"):
-                        if condicao_baixar != "1":
-                            log.info(f"Arquivo encontrado: {diretorio_completo}")
-                            _baixar_arquivo(ftp, diretorio_completo)
-                        elif condicao_baixar == "1":
-                            log.info(f"Arquivo encontrado: {diretorio_completo}")
-                            _baixar_arquivo_com_extensao_especifica(
-                                ftp, partes, diretorio_completo, tipo_extensao
+                    elif parts[0].startswith("-"):
+                        if download_kind != "1":
+                            log.info(f"File found: {full_directory}")
+                            _download_file(ftp, full_directory)
+                        elif download_kind == "1":
+                            log.info(f"File found: {full_directory}")
+                            _download_file_with_specific_extension(
+                                ftp, parts, full_directory, extension_type
                             )
 
             except Exception as e:
-                log.error(f"Erro ao processar {diretorio_atual}: {e}")
+                log.error(f"Error processing {current_path}: {e}")
 
-            profundidade_diretorio += 1
+            directory_depth += 1
 
-        log.info("Processamento concluído.")
+        log.info("Processing completed.")
     except Exception as e:
-        log.error(f"Erro ao tentar navegar/coletar as informações do sevidor: {e}")
+        log.error(f"Error attempting to navigate/collect server information: {e}")
 
 
-def finalizar_conexao(ftp):
-    # Realiza o fechamento da conexão caso esteja aberta
+def finalize_connection(ftp):
+    """
+    Finalizes the FTP connection by quitting the session.
+
+    This function attempts to close the given FTP connection gracefully by calling the `quit` method.
+    If an error occurs during this process, it logs an error message.
+
+    Args:
+        ftp (ftplib.FTP): The FTP connection object to be closed.
+
+    Raises:
+        Exception: If an error occurs while trying to close the connection.
+    """
     try:
         if "ftp" in locals():
             ftp.quit()
-            log.info("Conexão fechada com sucesso!")
+            log.info("Connection closed successfully!")
     except Exception as e:
-        log.error("Erro ao tentar encerrar a conexão %s", e)
+        log.error("Error trying to close the connection %s", e)

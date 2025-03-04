@@ -1,40 +1,37 @@
-from src.logging import registros
+from src.logging import get_logger
 from src.seviper import (
-    baixar_extensao_especifica,
-    passa_extensao_especifica,
-    requisita_credenciais,
-    iniciar_conexao,
-    raspagem_sevidor,
-    finalizar_conexao,
+    download_extension_kind,
+    specify_specific_extension,
+    request_credentials,
+    initiate_connection,
+    scrape_server,
+    finalize_connection,
 )
 
-log = registros()
+log = get_logger()
 
 
 def main():
     try:
-        condicao_baixar = baixar_extensao_especifica()  # interação com o usuário
-        tipo_extensao = passa_extensao_especifica(
-            condicao_baixar
-        )  # interação com o usuário
-        host, port, usuario, senha = requisita_credenciais()  # interação com o usuário
+        download_kind = download_extension_kind()
+        extension_type = specify_specific_extension(download_kind)
+        host, port, username, password = request_credentials()
 
-        ftp = iniciar_conexao(
-            host=host, port=port, usuario=usuario, senha=senha
-        )  # abertura da conexão
+        ftp = initiate_connection(
+            host=host, port=port, username=username, password=password
+        )
 
-        # coleta das informações (diretórios e dados)
-        raspagem_sevidor(
+        scrape_server(
             ftp=ftp,
-            condicao_baixar=condicao_baixar,
-            tipo_extensao=tipo_extensao,
+            download_kind=download_kind,
+            extension_type=extension_type,
         )
 
     except Exception as e:
-        log.error("Erro durante execução: %s", e)
+        log.error("Error while running: %s", e)
 
     finally:
-        finalizar_conexao(ftp=ftp)  # fechamento da conexão
+        finalize_connection(ftp=ftp)
 
 
 if __name__ == "__main__":
